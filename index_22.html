@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presupuestos Quirúrgicos CMGA</title>
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#122a4f;
+    --teal:#1A8A6F;
+    --teal-dark:#136b56;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --border:#dbe2ea;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --danger:#c0392b;
+    --danger-bg:#fdecea;
+    --warn-bg:#fff8e1;
+    --ok-bg:#e8f6f0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  header h1{
+    font-size:17px;
+    margin:0;
+    font-weight:700;
+  }
+  header .sub{
+    font-size:12px;
+    opacity:.85;
+  }
+  header .userbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13px;
+  }
+  header button.logout{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.5);
+    color:#fff;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+  }
+  header button.logout:hover{background:rgba(255,255,255,.15);}
+
+  #login-screen{
+    max-width:380px;
+    margin:60px auto;
+    background:var(--card);
+    border-radius:12px;
+    padding:32px 28px;
+    box-shadow:0 2px 14px rgba(0,0,0,.08);
+    text-align:center;
+  }
+  #login-screen h1{
+    color:var(--navy);
+    font-size:18px;
+    margin-bottom:4px;
+  }
+  #login-screen p.sub{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:0;
+    margin-bottom:22px;
+  }
+  #login-screen label{
+    display:block;
+    text-align:left;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+    margin-top:14px;
+  }
+  input, select, textarea{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:Arial, Helvetica, sans-serif;
+    color:var(--text);
+    background:#fff;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--teal);
+  }
+  .btn{
+    display:inline-block;
+    border:none;
+    border-radius:6px;
+    padding:9px 16px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    color:#fff;
+    background:var(--navy);
+  }
+  .btn:hover{background:var(--navy-dark);}
+  .btn.teal{background:var(--teal);}
+  .btn.teal:hover{background:var(--teal-dark);}
+  .btn.ghost{
+    background:transparent;
+    color:var(--navy);
+    border:1px solid var(--navy);
+  }
+  .btn.ghost:hover{background:#eef2f8;}
+  .btn.danger{background:transparent; color:var(--danger); border:1px solid var(--danger);}
+  .btn.danger:hover{background:var(--danger-bg);}
+  .btn.small{padding:5px 10px; font-size:12px;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  #login-screen .btn{width:100%; margin-top:20px; padding:11px;}
+  #login-error{
+    color:var(--danger);
+    font-size:12px;
+    margin-top:10px;
+    min-height:14px;
+  }
+
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:20px 16px 60px;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:8px 16px;
+    font-size:13px;
+    cursor:pointer;
+    color:var(--navy);
+    font-weight:600;
+  }
+  .tab-btn.active{
+    background:var(--navy);
+    color:#fff;
+    border-color:var(--navy);
+  }
+  .badge{
+    display:inline-block;
+    min-width:18px;
+    padding:1px 6px;
+    border-radius:10px;
+    background:var(--danger);
+    color:#fff;
+    font-size:11px;
+    margin-left:6px;
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-size:15px;
+    color:var(--navy);
+    margin:0 0 12px 0;
+  }
+  .subhead{
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+    margin:20px 0 8px;
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .filters{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .filters input, .filters select{width:auto; min-width:130px;}
+  .check-inline{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .check-inline input{width:auto;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th, td{
+    text-align:left;
+    padding:8px 8px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  th{
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  tbody tr:hover{background:#f8fafc;}
+  .tablewrap{overflow-x:auto;}
+
+  .pill{
+    display:inline-block;
+    padding:2px 9px;
+    border-radius:12px;
+    font-size:11px;
+    font-weight:700;
+  }
+  .pill.pend{background:var(--warn-bg); color:#8a6d00;}
+  .pill.pagada{background:var(--ok-bg); color:var(--teal-dark);}
+  .money{font-variant-numeric: tabular-nums;}
+  .neg{color:var(--danger); font-weight:700;}
+  .delta{font-weight:700;}
+  .delta.up{color:var(--teal-dark);}
+  .delta.down{color:var(--danger);}
+  .delta.flat{color:var(--muted);}
+
+  .modal-bg{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(15,25,40,.5);
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:50;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:10px;
+    width:100%;
+    max-width:520px;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:22px;
+  }
+  .modal h3{
+    margin-top:0;
+    color:var(--navy);
+    font-size:16px;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:520px){ .grid2{grid-template-columns:1fr;} }
+  .field{margin-bottom:2px;}
+  .field label{
+    display:block;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+  .modal-actions .spacer{flex:1;}
+  .empty{
+    color:var(--muted);
+    font-size:13px;
+    text-align:center;
+    padding:24px 0;
+  }
+  .toast{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--navy);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13px;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+    z-index:100;
+    display:none;
+  }
+  .toast.error{background:var(--danger);}
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .stat .lbl{font-size:11px; color:var(--muted); text-transform:uppercase;}
+  .stat .val{font-size:20px; font-weight:700; color:var(--navy); margin-top:2px;}
+  .stat .sub{font-size:11px; color:var(--muted); margin-top:2px;}
+  .hint{font-size:12px; color:var(--muted); margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>Presupuestos Quirúrgicos CMGA</h1>
+  <p class="sub">Centro Médico Galerías Aguascalientes</p>
+  <label for="login-pin">PIN de acceso</label>
+  <input type="password" id="login-pin" placeholder="PIN" autocomplete="off">
+  <label for="login-nombre">Tu nombre</label>
+  <input type="text" id="login-nombre" placeholder="Nombre y apellido" autocomplete="off">
+  <button class="btn" id="btn-login">Entrar</button>
+  <div id="login-error"></div>
+</div>
+
+<div id="app" style="display:none;">
+  <header>
+    <div>
+      <h1>Presupuestos Quirúrgicos CMGA</h1>
+      <div class="sub">Vinculación Médica y Cajas · <span id="rol-label"></span>
+        <a id="link-sheet" href="https://docs.google.com/spreadsheets/d/1VQfL95VW1wp9ilBgpS02DmLrCorCqnP0gKK1KptuWwo/edit" target="_blank" rel="noopener" style="display:none; color:#fff; opacity:.85; font-size:11px; text-decoration:underline; margin-left:8px;">Ver hoja de cálculo ↗</a>
+      </div>
+    </div>
+    <div class="userbox">
+      <span id="user-label"></span>
+      <button class="logout" id="btn-logout">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs" id="tabs"></div>
+
+    <!-- ===================== TAB: REGISTRO ===================== -->
+    <div class="tab-panel" id="panel-registro">
+      <div class="card">
+        <div class="toolbar">
+          <h2 style="margin:0;" id="registro-titulo">Todas las cirugías</h2>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <div class="filters">
+              <input type="text" id="f-buscar" placeholder="Buscar médico o paciente...">
+              <select id="f-estatus">
+                <option value="">Todos los estatus</option>
+              </select>
+              <input type="date" id="f-desde" title="Desde">
+              <input type="date" id="f-hasta" title="Hasta">
+            </div>
+            <label class="check-inline" id="f-eliminados-wrap" style="display:none;">
+              <input type="checkbox" id="f-mostrar-eliminados"> Ver papelera
+            </label>
+            <button class="btn ghost small" id="btn-exportar-registro">⬇ Exportar CSV</button>
+            <button class="btn teal" id="btn-nueva-cirugia">+ Nueva cirugía</button>
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
+                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Diferencia</th>
+                <th>Estatus</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-registro"></tbody>
+          </table>
+          <div class="empty" id="registro-vacio" style="display:none;">No hay cirugías registradas todavía.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB: PENDIENTES (ambos roles) ===================== -->
+    <div class="tab-panel" id="panel-pendientes">
+      <div class="card">
+        <div class="toolbar">
+          <h2 style="margin:0;">Pendientes de cobro</h2>
+          <div class="filters">
+            <input type="text" id="p-buscar" placeholder="Buscar médico o paciente...">
+            <input type="date" id="p-desde" title="Desde">
+            <input type="date" id="p-hasta" title="Hasta">
+          </div>
+        </div>
+        <p class="hint">Cirugías marcadas por Vinculación Médica como "Pendiente de pago" (paquete o no paquete).</p>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
+                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Falta por cobrar</th>
+                <th>Días</th><th>Estatus</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pendientes"></tbody>
+          </table>
+          <div class="empty" id="pendientes-vacio" style="display:none;">No hay pendientes de cobro. 🎉</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB: CONCENTRADO (ambos roles) ===================== -->
+    <div class="tab-panel" id="panel-concentrado">
+      <div class="card">
+        <div class="toolbar">
+          <h2 style="margin:0;" id="concentrado-titulo">Concentrado mensual por médico</h2>
+          <div class="filters">
+            <select id="c-vista">
+              <option value="mensual">Vista mensual</option>
+              <option value="anual">Vista anual</option>
+            </select>
+            <select id="c-mes"></select>
+            <select id="c-anio"></select>
+            <button class="btn ghost small" id="btn-exportar-concentrado">⬇ Exportar CSV</button>
+          </div>
+        </div>
+
+        <div class="stat-row" id="concentrado-stats"></div>
+
+        <div id="concentrado-comparativo-wrap">
+          <div class="subhead" id="concentrado-comparativo-titulo">Comparado con el mes anterior</div>
+          <div class="stat-row" id="concentrado-comparativo"></div>
+        </div>
+
+        <div class="subhead">Por tipo de paquete</div>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th></th><th>Cirugías</th><th>Pagadas</th><th>Pendientes</th><th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th></tr>
+            </thead>
+            <tbody id="tabla-paquete"></tbody>
+          </table>
+        </div>
+
+        <div class="subhead">Por médico</div>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Médico</th><th>Cirugías</th><th>Pagadas</th><th>Pendientes</th>
+                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th><th>Antigüedad prom.</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-concentrado"></tbody>
+          </table>
+          <div class="empty" id="concentrado-vacio" style="display:none;">Sin cirugías en este periodo.</div>
+        </div>
+
+        <div id="concentrado-tendencia-wrap" style="display:none;">
+          <div class="subhead">Tendencia mensual del año</div>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr><th>Mes</th><th>Cirugías</th><th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th></tr>
+              </thead>
+              <tbody id="tabla-tendencia"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ===================== MODAL: Nueva / Editar cirugía (Vinculación) ===================== -->
+<div class="modal-bg" id="modal-cirugia">
+  <div class="modal">
+    <h3 id="modal-cirugia-titulo">Nueva cirugía</h3>
+    <input type="hidden" id="mc-id">
+    <div class="grid2">
+      <div class="field">
+        <label>Fecha de cirugía</label>
+        <input type="date" id="mc-fecha">
+      </div>
+      <div class="field">
+        <label>Estatus</label>
+        <select id="mc-estatus"></select>
+      </div>
+      <div class="field">
+        <label>Médico cirujano</label>
+        <input type="text" id="mc-medico" placeholder="Dr(a). ...">
+      </div>
+      <div class="field">
+        <label>Paciente</label>
+        <input type="text" id="mc-paciente">
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Cirugía / procedimiento</label>
+        <input type="text" id="mc-tipo">
+      </div>
+      <div class="field">
+        <label>Presupuesto</label>
+        <input type="number" step="0.01" id="mc-presupuesto">
+      </div>
+      <div class="field">
+        <label>Importe N.C. (no atención / cancelación)</label>
+        <input type="number" step="0.01" id="mc-nc">
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Folio de nota de crédito (si aplica)</label>
+        <input type="text" id="mc-folionc" placeholder="NC-0000">
+      </div>
+      <div class="field" id="mc-cobro-wrap" style="display:none;">
+        <label>Total cobrado (normalmente lo captura Cajas; edítalo aquí solo para corregir)</label>
+        <input type="number" step="0.01" id="mc-cobrado">
+      </div>
+      <div class="field" id="mc-formapago-wrap" style="display:none;">
+        <label>Forma de pago</label>
+        <select id="mc-formapago"></select>
+      </div>
+      <div class="field" id="mc-foliofactura-wrap" style="display:none; grid-column:1/-1;">
+        <label>Folio de factura</label>
+        <input type="text" id="mc-foliofactura" placeholder="FAC-0000">
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Observaciones</label>
+        <textarea id="mc-obs" rows="2"></textarea>
+      </div>
+    </div>
+    <p class="hint" id="mc-cobro-info"></p>
+    <div class="modal-actions">
+      <button class="btn danger small" id="mc-eliminar" style="display:none;">Eliminar cirugía</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="mc-cancelar">Cancelar</button>
+      <button class="btn teal" id="mc-guardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: Registrar cobro (Cajas) ===================== -->
+<div class="modal-bg" id="modal-cobro">
+  <div class="modal" style="max-width:420px;">
+    <h3>Registrar cobro</h3>
+    <p class="hint" id="rc-info"></p>
+    <div class="field">
+      <label>Total cobrado</label>
+      <input type="number" step="0.01" id="rc-monto">
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Forma de pago</label>
+      <select id="rc-formapago"></select>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Folio de factura (si aplica)</label>
+      <input type="text" id="rc-folio" placeholder="FAC-0000">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="rc-cancelar">Cancelar</button>
+      <button class="btn teal" id="rc-guardar">Guardar cobro</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== Configuración de roles ===================== */
+var PINES = {
+  'VINC1': { rol: 'vinculacion', label: 'Vinculación Médica (acceso total)' },
+  'CAJA1': { rol: 'cajas', label: 'Cajas (solo captura de cobro)' }
+};
+var ESTATUS_LISTA = [
+  'Pendiente de pago - Es paquete',
+  'Pendiente de pago - No es paquete',
+  'Pagada - Es paquete',
+  'Pagada - No es paquete'
+];
+var FORMAS_PAGO = ['Efectivo', 'Tarjeta', 'Transferencia', 'Mixto', 'Otro'];
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var LS_KEY = 'presupuestosqx_cmga_v1';
+
+/* URL de tu implementación de Apps Script (termina en /exec). Si alguna vez
+   vuelves a implementar el proyecto y cambia el ID de implementación, pega
+   aquí la nueva URL. */
+var API_URL = 'https://script.google.com/macros/s/AKfycbwevjVz9Z0dxc2HbhL6xqBEFeE__bVL_SFN4mlEEWZfX1D4Wwt-Yii-cz_yGvBYD2eHEQ/exec';
+
+// Acciones de solo lectura: van por GET (sin esto, Apps Script no permite
+// mezclar action= por GET con nada más; y GET evita el preflight de CORS).
+var ACCIONES_LECTURA = ['getCirugias', 'getPapelera', 'getAlertasPendientes', 'getConcentradoMensual', 'getConcentradoAnual'];
+
+var sesion = null; // {rol, nombre}
+var cacheCirugias = [];
+var cachePapelera = [];
+var tabActual = null;
+
+/* ===================== Utilidades ===================== */
+function money(n){
+  n = Number(n) || 0;
+  return '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function pillClass(estatus){
+  return (estatus || '').indexOf('Pendiente de pago') === 0 ? 'pend' : 'pagada';
+}
+function showToast(msg, isError){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.style.display = 'block';
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(function(){ t.style.display = 'none'; }, 3200);
+}
+function llamarApi(accion, args){
+  var esLectura = ACCIONES_LECTURA.indexOf(accion) >= 0;
+  var peticion;
+  if (esLectura){
+    var url = API_URL + '?action=' + encodeURIComponent(accion) +
+      '&args=' + encodeURIComponent(JSON.stringify(args || [])) +
+      '&t=' + Date.now(); // evita respuestas cacheadas
+    peticion = fetch(url);
+  } else {
+    peticion = fetch(API_URL, {
+      method: 'POST',
+      // text/plain evita que el navegador mande un preflight OPTIONS, que
+      // Apps Script no sabe responder.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: accion, args: args || [] })
+    });
+  }
+  return peticion
+    .then(function(resp){ return resp.json(); })
+    .then(function(res){
+      if (!res || res.ok !== true) throw new Error((res && res.error) || 'Error del servidor.');
+      return res.data;
+    });
+}
+
+function runServer(fnName, args, onOk, onErr){
+  llamarApi(fnName, args).then(onOk).catch(function(err){
+    showToast(err.message || 'No se pudo conectar con el servidor.', true);
+    if (onErr) onErr(err);
+  });
+}
+function esc(s){
+  s = (s === undefined || s === null) ? '' : String(s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function enRango(fechaISO, desde, hasta){
+  if (!fechaISO) return true;
+  if (desde && fechaISO < desde) return false;
+  if (hasta && fechaISO > hasta) return false;
+  return true;
+}
+
+/* ===================== Exportar CSV ===================== */
+function csvEscape(v){
+  v = (v === undefined || v === null) ? '' : String(v);
+  if (/[",\n]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+function descargarCSV(nombreArchivo, filas){
+  var contenido = '﻿' + filas.map(function(fila){
+    return fila.map(csvEscape).join(',');
+  }).join('\r\n');
+  var blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nombreArchivo;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===================== Login ===================== */
+document.getElementById('btn-login').addEventListener('click', intentarLogin);
+document.getElementById('login-pin').addEventListener('keydown', function(e){ if(e.key==='Enter') intentarLogin(); });
+document.getElementById('login-nombre').addEventListener('keydown', function(e){ if(e.key==='Enter') intentarLogin(); });
+
+function intentarLogin(){
+  var pin = document.getElementById('login-pin').value.trim().toUpperCase();
+  var nombre = document.getElementById('login-nombre').value.trim();
+  var err = document.getElementById('login-error');
+  err.textContent = '';
+  if (!nombre){
+    err.textContent = 'Escribe tu nombre.';
+    return;
+  }
+  var conf = PINES[pin];
+  if (!conf){
+    err.textContent = 'PIN incorrecto.';
+    return;
+  }
+  sesion = { rol: conf.rol, label: conf.label, nombre: nombre };
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(sesion)); }catch(e){}
+  iniciarApp();
+}
+
+function cargarSesionGuardada(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw){
+      sesion = JSON.parse(raw);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+document.getElementById('btn-logout').addEventListener('click', function(){
+  sesion = null;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+  document.getElementById('login-pin').value = '';
+});
+
+/* ===================== Arranque de la app según rol ===================== */
+function iniciarApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('rol-label').textContent = sesion.label;
+  document.getElementById('user-label').textContent = sesion.nombre;
+
+  llenarSelectEstatus(document.getElementById('mc-estatus'), { placeholder: '-- Selecciona estatus --' });
+  llenarSelectEstatus(document.getElementById('f-estatus'), { todos: 'Todos los estatus' });
+  llenarSelectFormaPago(document.getElementById('mc-formapago'));
+  llenarSelectFormaPago(document.getElementById('rc-formapago'));
+  llenarSelectoresFecha();
+
+  var esVinc = sesion.rol === 'vinculacion';
+  document.getElementById('btn-nueva-cirugia').style.display = esVinc ? 'inline-block' : 'none';
+  document.getElementById('f-eliminados-wrap').style.display = esVinc ? 'flex' : 'none';
+  document.getElementById('link-sheet').style.display = esVinc ? 'inline' : 'none';
+
+  construirTabs();
+  cargarTodo();
+}
+
+function llenarSelectEstatus(select, opciones){
+  opciones = opciones || {};
+  select.innerHTML = '';
+  if (opciones.todos !== undefined){
+    var opTodos = document.createElement('option');
+    opTodos.value = ''; opTodos.textContent = opciones.todos;
+    select.appendChild(opTodos);
+  }
+  if (opciones.placeholder){
+    var opPh = document.createElement('option');
+    opPh.value = ''; opPh.textContent = opciones.placeholder; opPh.disabled = true;
+    select.appendChild(opPh);
+  }
+  ESTATUS_LISTA.forEach(function(e){
+    var op = document.createElement('option');
+    op.value = e; op.textContent = e;
+    select.appendChild(op);
+  });
+}
+
+function llenarSelectFormaPago(select){
+  select.innerHTML = '';
+  FORMAS_PAGO.forEach(function(f){
+    var op = document.createElement('option');
+    op.value = f; op.textContent = f;
+    select.appendChild(op);
+  });
+}
+
+function llenarSelectoresFecha(){
+  var selMes = document.getElementById('c-mes');
+  var selAnio = document.getElementById('c-anio');
+  selMes.innerHTML = '';
+  MESES.forEach(function(m, i){
+    var op = document.createElement('option');
+    op.value = i+1; op.textContent = m;
+    selMes.appendChild(op);
+  });
+  var hoy = new Date();
+  selMes.value = hoy.getMonth()+1;
+  selAnio.innerHTML = '';
+  for (var a = hoy.getFullYear()-1; a <= hoy.getFullYear()+1; a++){
+    var opA = document.createElement('option');
+    opA.value = a; opA.textContent = a;
+    if (a === hoy.getFullYear()) opA.selected = true;
+    selAnio.appendChild(opA);
+  }
+  document.getElementById('c-vista').addEventListener('change', function(){
+    var anual = this.value === 'anual';
+    document.getElementById('c-mes').style.display = anual ? 'none' : '';
+    document.getElementById('concentrado-titulo').textContent = anual ? 'Concentrado anual por médico' : 'Concentrado mensual por médico';
+    document.getElementById('concentrado-comparativo-wrap').style.display = anual ? 'none' : '';
+    document.getElementById('concentrado-tendencia-wrap').style.display = anual ? 'block' : 'none';
+    cargarConcentrado();
+  });
+  selMes.addEventListener('change', cargarConcentrado);
+  selAnio.addEventListener('change', cargarConcentrado);
+}
+
+function construirTabs(){
+  var tabsDiv = document.getElementById('tabs');
+  tabsDiv.innerHTML = '';
+  var tabs = [];
+  tabs.push({ id:'registro', label: sesion.rol === 'vinculacion' ? 'Registro de cirugías' : 'Todas las cirugías' });
+  tabs.push({ id:'pendientes', label:'Pendientes de cobro', badge:true });
+  tabs.push({ id:'concentrado', label:'Concentrado' });
+
+  tabs.forEach(function(t, idx){
+    var btn = document.createElement('button');
+    btn.className = 'tab-btn' + (idx===0 ? ' active' : '');
+    btn.dataset.tab = t.id;
+    btn.innerHTML = t.label + (t.badge ? ' <span class="badge" id="badge-pendientes" style="display:none;">0</span>' : '');
+    btn.addEventListener('click', function(){ cambiarTab(t.id); });
+    tabsDiv.appendChild(btn);
+  });
+  cambiarTab(tabs[0].id);
+}
+
+function cambiarTab(id){
+  tabActual = id;
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'concentrado') cargarConcentrado();
+}
+
+/* ===================== Carga de datos ===================== */
+function cargarTodo(){
+  runServer('getCirugias', [false], function(lista){
+    cacheCirugias = lista || [];
+    renderRegistro();
+    renderPendientes();
+    if (tabActual === 'concentrado') cargarConcentrado();
+  });
+}
+
+function cargarPapelera(cb){
+  runServer('getPapelera', [], function(lista){
+    cachePapelera = lista || [];
+    if (cb) cb();
+  });
+}
+
+/* ---- Registro ---- */
+['f-buscar','f-desde','f-hasta'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', renderRegistro);
+});
+document.getElementById('f-estatus').addEventListener('change', renderRegistro);
+document.getElementById('f-mostrar-eliminados').addEventListener('change', function(){
+  var ver = this.checked;
+  document.getElementById('registro-titulo').textContent = ver ? 'Papelera de cirugías eliminadas' : 'Todas las cirugías';
+  document.getElementById('btn-nueva-cirugia').style.display = ver ? 'none' : 'inline-block';
+  if (ver) cargarPapelera(renderRegistro); else renderRegistro();
+});
+
+function filaCSVCirugia(c){
+  return [
+    c.fechaCirugia, c.medicoCirujano, c.paciente, c.tipoCirugia,
+    c.presupuesto, c.totalCobrado, c.importeNC, c.folioNC, c.diferencia,
+    c.estatus, c.formaPago, c.folioFactura, c.observaciones,
+    c.capturadoPor, c.modificadoPor, c.cobradoPor
+  ];
+}
+
+function renderRegistro(){
+  var tbody = document.getElementById('tabla-registro');
+  if (!tbody) return;
+  var verEliminados = document.getElementById('f-mostrar-eliminados').checked;
+  var buscar = (document.getElementById('f-buscar').value || '').toLowerCase();
+  var estatusF = document.getElementById('f-estatus').value;
+  var desde = document.getElementById('f-desde').value;
+  var hasta = document.getElementById('f-hasta').value;
+  tbody.innerHTML = '';
+  var fuente = verEliminados ? cachePapelera : cacheCirugias;
+  var lista = fuente.filter(function(c){
+    var okBuscar = !buscar || (c.medicoCirujano||'').toLowerCase().indexOf(buscar)>=0 || (c.paciente||'').toLowerCase().indexOf(buscar)>=0;
+    var okEstatus = !estatusF || c.estatus === estatusF;
+    var okFecha = enRango(c.fechaCirugia, desde, hasta);
+    return okBuscar && okEstatus && okFecha;
+  });
+  document.getElementById('registro-vacio').style.display = lista.length ? 'none' : 'block';
+  document.getElementById('registro-vacio').textContent = verEliminados ? 'La papelera está vacía.' : 'No hay cirugías registradas todavía.';
+  lista.forEach(function(c){
+    var tr = document.createElement('tr');
+    var accion = verEliminados
+      ? '<button class="btn ghost small" data-id="'+c.id+'">Restaurar</button>'
+      : (sesion.rol === 'vinculacion'
+          ? '<button class="btn ghost small" data-id="'+c.id+'">Editar</button>'
+          : '<button class="btn teal small" data-id="'+c.id+'">Cobro</button>');
+    tr.innerHTML =
+      '<td>'+(c.fechaCirugia||'')+'</td>'+
+      '<td>'+esc(c.medicoCirujano)+'</td>'+
+      '<td>'+esc(c.paciente)+'</td>'+
+      '<td>'+esc(c.tipoCirugia)+'</td>'+
+      '<td class="money">'+money(c.presupuesto)+'</td>'+
+      '<td class="money">'+money(c.totalCobrado)+'</td>'+
+      '<td class="money">'+money(c.importeNC)+'</td>'+
+      '<td class="money'+(c.diferencia>0.01?' neg':'')+'">'+money(c.diferencia)+'</td>'+
+      '<td><span class="pill '+pillClass(c.estatus)+'">'+esc(c.estatus)+'</span></td>'+
+      '<td>'+accion+'</td>';
+    tr.querySelector('button').addEventListener('click', function(){
+      if (verEliminados) restaurar(c.id);
+      else if (sesion.rol === 'vinculacion') abrirModalEditar(c);
+      else abrirModalCobro(c);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function restaurar(id){
+  runServer('restaurarCirugia', [id], function(){
+    showToast('Cirugía restaurada.');
+    cargarPapelera(renderRegistro);
+    cargarTodo();
+  });
+}
+
+document.getElementById('btn-exportar-registro').addEventListener('click', function(){
+  var verEliminados = document.getElementById('f-mostrar-eliminados').checked;
+  var fuente = verEliminados ? cachePapelera : cacheCirugias;
+  var buscar = (document.getElementById('f-buscar').value || '').toLowerCase();
+  var estatusF = document.getElementById('f-estatus').value;
+  var desde = document.getElementById('f-desde').value;
+  var hasta = document.getElementById('f-hasta').value;
+  var lista = fuente.filter(function(c){
+    var okBuscar = !buscar || (c.medicoCirujano||'').toLowerCase().indexOf(buscar)>=0 || (c.paciente||'').toLowerCase().indexOf(buscar)>=0;
+    var okEstatus = !estatusF || c.estatus === estatusF;
+    var okFecha = enRango(c.fechaCirugia, desde, hasta);
+    return okBuscar && okEstatus && okFecha;
+  });
+  var filas = [['Fecha','Médico','Paciente','Cirugía','Presupuesto','Cobrado','Importe NC','Folio NC','Diferencia','Estatus','Forma de pago','Folio factura','Observaciones','Capturado por','Modificado por','Cobrado por']];
+  lista.forEach(function(c){ filas.push(filaCSVCirugia(c)); });
+  descargarCSV('presupuestos_quirurgicos_' + (verEliminados ? 'papelera' : 'registro') + '.csv', filas);
+});
+
+/* ---- Pendientes (ambos roles) ---- */
+['p-buscar','p-desde','p-hasta'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', renderPendientes);
+});
+
+function renderPendientes(){
+  var tbody = document.getElementById('tabla-pendientes');
+  var buscar = (document.getElementById('p-buscar').value || '').toLowerCase();
+  var desde = document.getElementById('p-desde').value;
+  var hasta = document.getElementById('p-hasta').value;
+  var lista = cacheCirugias.filter(function(c){
+    if (!c.pendienteCobro) return false;
+    var okBuscar = !buscar || (c.medicoCirujano||'').toLowerCase().indexOf(buscar)>=0 || (c.paciente||'').toLowerCase().indexOf(buscar)>=0;
+    var okFecha = enRango(c.fechaCirugia, desde, hasta);
+    return okBuscar && okFecha;
+  });
+  tbody.innerHTML = '';
+  document.getElementById('pendientes-vacio').style.display = lista.length ? 'none' : 'block';
+  var badge = document.getElementById('badge-pendientes');
+  if (badge){
+    var totalPend = cacheCirugias.filter(function(c){ return c.pendienteCobro; }).length;
+    badge.textContent = totalPend;
+    badge.style.display = totalPend ? 'inline-block' : 'none';
+  }
+  lista.forEach(function(c){
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>'+(c.fechaCirugia||'')+'</td>'+
+      '<td>'+esc(c.medicoCirujano)+'</td>'+
+      '<td>'+esc(c.paciente)+'</td>'+
+      '<td>'+esc(c.tipoCirugia)+'</td>'+
+      '<td class="money">'+money(c.presupuesto)+'</td>'+
+      '<td class="money">'+money(c.totalCobrado)+'</td>'+
+      '<td class="money">'+money(c.importeNC)+'</td>'+
+      '<td class="money neg">'+money(c.diferencia)+'</td>'+
+      '<td'+(c.diasPendiente>30?' class="neg"':'')+'>'+(c.diasPendiente!=null?c.diasPendiente:'—')+'</td>'+
+      '<td><span class="pill '+pillClass(c.estatus)+'">'+esc(c.estatus)+'</span></td>'+
+      '<td><button class="btn teal small" data-id="'+c.id+'">Registrar cobro</button></td>';
+    tr.querySelector('button').addEventListener('click', function(){ abrirModalCobro(c); });
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---- Concentrado (ambos roles) ---- */
+function cargarConcentrado(){
+  var vista = document.getElementById('c-vista').value;
+  var anio = parseInt(document.getElementById('c-anio').value, 10);
+  if (vista === 'anual'){
+    runServer('getConcentradoAnual', [anio], function(res){ renderConcentrado(res, 'anual'); });
+  } else {
+    var mes = parseInt(document.getElementById('c-mes').value, 10);
+    runServer('getConcentradoMensual', [mes, anio], function(res){ renderConcentrado(res, 'mensual'); });
+  }
+}
+
+function statConDelta(lbl, valorTxt, deltaTxt, deltaTipo){
+  return '<div class="stat"><div class="lbl">'+lbl+'</div><div class="val">'+valorTxt+'</div>'+
+    (deltaTxt ? '<div class="sub delta '+deltaTipo+'">'+deltaTxt+'</div>' : '') + '</div>';
+}
+
+function calcularDelta(actual, anterior){
+  if (!anterior){
+    return actual ? { txt: 'nuevo', tipo: 'up' } : { txt: 'sin cambio', tipo: 'flat' };
+  }
+  var pct = Math.round(((actual - anterior) / anterior) * 100);
+  if (pct === 0) return { txt: '0%', tipo: 'flat' };
+  return { txt: (pct > 0 ? '+' : '') + pct + '% vs mes anterior', tipo: pct > 0 ? 'up' : 'down' };
+}
+
+function renderConcentrado(res, vista){
+  var t = res.totales;
+  var stats = document.getElementById('concentrado-stats');
+  stats.innerHTML =
+    stat('Cirugías', t.cirugias) +
+    stat('Pagadas', t.pagadas) +
+    stat('Pendientes', t.pendientes) +
+    stat('Presupuesto', money(t.presupuesto)) +
+    stat('Cobrado', money(t.totalCobrado)) +
+    stat('Nota de crédito', money(t.importeNC)) +
+    stat('Monto pendiente', money(t.pendiente)) +
+    stat('Antigüedad prom. (días)', t.diasPendientePromedio);
+
+  if (vista === 'mensual' && res.comparativo){
+    var a = res.comparativo.totales;
+    var comp = document.getElementById('concentrado-comparativo');
+    document.getElementById('concentrado-comparativo-titulo').textContent =
+      'Comparado con ' + MESES[res.comparativo.mesAnterior-1] + ' ' + res.comparativo.anioAnterior;
+    var dPres = calcularDelta(t.presupuesto, a.presupuesto);
+    var dCob = calcularDelta(t.totalCobrado, a.totalCobrado);
+    var dPend = calcularDelta(t.pendiente, a.pendiente);
+    comp.innerHTML =
+      statConDelta('Presupuesto', money(t.presupuesto), dPres.txt, dPres.tipo) +
+      statConDelta('Cobrado', money(t.totalCobrado), dCob.txt, dCob.tipo) +
+      statConDelta('Monto pendiente', money(t.pendiente), dPend.txt, dPend.tipo) +
+      statConDelta('Cirugías', t.cirugias, (t.cirugias - a.cirugias >= 0 ? '+' : '') + (t.cirugias - a.cirugias) + ' vs mes anterior', (t.cirugias>=a.cirugias?'up':'down'));
+  }
+
+  var tp = document.getElementById('tabla-paquete');
+  tp.innerHTML = '';
+  [['Es paquete', res.porPaquete.esPaquete], ['No es paquete', res.porPaquete.noEsPaquete]].forEach(function(par){
+    var g = par[1];
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><strong>'+par[0]+'</strong></td>'+
+      '<td>'+g.cirugias+'</td>'+
+      '<td>'+g.pagadas+'</td>'+
+      '<td>'+g.pendientes+'</td>'+
+      '<td class="money">'+money(g.presupuesto)+'</td>'+
+      '<td class="money">'+money(g.totalCobrado)+'</td>'+
+      '<td class="money">'+money(g.importeNC)+'</td>'+
+      '<td class="money'+(g.pendiente>0.01?' neg':'')+'">'+money(g.pendiente)+'</td>';
+    tp.appendChild(tr);
+  });
+
+  var tbody = document.getElementById('tabla-concentrado');
+  tbody.innerHTML = '';
+  document.getElementById('concentrado-vacio').style.display = res.porMedico.length ? 'none' : 'block';
+  res.porMedico.forEach(function(g){
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>'+esc(g.medico)+'</td>'+
+      '<td>'+g.cirugias+'</td>'+
+      '<td>'+g.pagadas+'</td>'+
+      '<td>'+g.pendientes+'</td>'+
+      '<td class="money">'+money(g.presupuesto)+'</td>'+
+      '<td class="money">'+money(g.totalCobrado)+'</td>'+
+      '<td class="money">'+money(g.importeNC)+'</td>'+
+      '<td class="money'+(g.pendiente>0.01?' neg':'')+'">'+money(g.pendiente)+'</td>'+
+      '<td>'+g.diasPendientePromedio+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  if (vista === 'anual' && res.porMes){
+    var tt = document.getElementById('tabla-tendencia');
+    tt.innerHTML = '';
+    res.porMes.forEach(function(m){
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+MESES[m.mes-1]+'</td>'+
+        '<td>'+m.cirugias+'</td>'+
+        '<td class="money">'+money(m.presupuesto)+'</td>'+
+        '<td class="money">'+money(m.totalCobrado)+'</td>'+
+        '<td class="money">'+money(m.importeNC)+'</td>'+
+        '<td class="money'+(m.pendiente>0.01?' neg':'')+'">'+money(m.pendiente)+'</td>';
+      tt.appendChild(tr);
+    });
+  }
+
+  window._ultimoConcentrado = { res: res, vista: vista };
+}
+
+function stat(lbl, val){
+  return '<div class="stat"><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div></div>';
+}
+
+document.getElementById('btn-exportar-concentrado').addEventListener('click', function(){
+  var datos = window._ultimoConcentrado;
+  if (!datos) return;
+  var filas = [['Médico','Cirugías','Pagadas','Pendientes','Presupuesto','Cobrado','Importe NC','Pendiente','Antigüedad prom. (días)']];
+  datos.res.porMedico.forEach(function(g){
+    filas.push([g.medico, g.cirugias, g.pagadas, g.pendientes, g.presupuesto, g.totalCobrado, g.importeNC, g.pendiente, g.diasPendientePromedio]);
+  });
+  var t = datos.res.totales;
+  filas.push(['TOTAL', t.cirugias, t.pagadas, t.pendientes, t.presupuesto, t.totalCobrado, t.importeNC, t.pendiente, t.diasPendientePromedio]);
+  descargarCSV('concentrado_' + datos.vista + '.csv', filas);
+});
+
+/* ===================== Modal Nueva/Editar cirugía (Vinculación) ===================== */
+document.getElementById('btn-nueva-cirugia').addEventListener('click', function(){ abrirModalNueva(); });
+document.getElementById('mc-cancelar').addEventListener('click', cerrarModalCirugia);
+document.getElementById('mc-guardar').addEventListener('click', guardarCirugia);
+document.getElementById('mc-eliminar').addEventListener('click', eliminarDesdeModal);
+
+function abrirModalNueva(){
+  document.getElementById('modal-cirugia-titulo').textContent = 'Nueva cirugía';
+  document.getElementById('mc-id').value = '';
+  document.getElementById('mc-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mc-medico').value = '';
+  document.getElementById('mc-paciente').value = '';
+  document.getElementById('mc-tipo').value = '';
+  document.getElementById('mc-presupuesto').value = '';
+  document.getElementById('mc-nc').value = 0;
+  document.getElementById('mc-folionc').value = '';
+  document.getElementById('mc-estatus').value = '';
+  document.getElementById('mc-obs').value = '';
+  document.getElementById('mc-cobro-wrap').style.display = 'none';
+  document.getElementById('mc-formapago-wrap').style.display = 'none';
+  document.getElementById('mc-foliofactura-wrap').style.display = 'none';
+  document.getElementById('mc-eliminar').style.display = 'none';
+  document.getElementById('mc-cobro-info').textContent = 'El total cobrado, forma de pago y folio de factura los captura Cajas desde su propia vista (puedes corregirlos después, editando la cirugía).';
+  document.getElementById('modal-cirugia').classList.add('open');
+}
+
+function abrirModalEditar(c){
+  document.getElementById('modal-cirugia-titulo').textContent = 'Editar cirugía';
+  document.getElementById('mc-id').value = c.id;
+  document.getElementById('mc-fecha').value = c.fechaCirugia;
+  document.getElementById('mc-medico').value = c.medicoCirujano;
+  document.getElementById('mc-paciente').value = c.paciente;
+  document.getElementById('mc-tipo').value = c.tipoCirugia;
+  document.getElementById('mc-presupuesto').value = c.presupuesto;
+  document.getElementById('mc-nc').value = c.importeNC;
+  document.getElementById('mc-folionc').value = c.folioNC || '';
+  document.getElementById('mc-estatus').value = c.estatus;
+  document.getElementById('mc-obs').value = c.observaciones;
+  document.getElementById('mc-cobro-wrap').style.display = 'block';
+  document.getElementById('mc-cobrado').value = c.totalCobrado;
+  document.getElementById('mc-formapago-wrap').style.display = 'block';
+  document.getElementById('mc-formapago').value = c.formaPago || FORMAS_PAGO[0];
+  document.getElementById('mc-foliofactura-wrap').style.display = 'block';
+  document.getElementById('mc-foliofactura').value = c.folioFactura || '';
+  document.getElementById('mc-eliminar').style.display = 'inline-block';
+  document.getElementById('mc-eliminar').dataset.id = c.id;
+  document.getElementById('mc-cobro-info').textContent = c.cobradoPor ? ('Último cobro registrado por ' + c.cobradoPor + (c.fechaRegistroCobro ? (' el ' + c.fechaRegistroCobro) : '')) : 'Aún sin cobro registrado por Cajas.';
+  document.getElementById('modal-cirugia').classList.add('open');
+}
+
+function cerrarModalCirugia(){
+  document.getElementById('modal-cirugia').classList.remove('open');
+}
+
+function guardarCirugia(){
+  var id = document.getElementById('mc-id').value;
+  var datos = {
+    fechaCirugia: document.getElementById('mc-fecha').value,
+    medicoCirujano: document.getElementById('mc-medico').value.trim(),
+    paciente: document.getElementById('mc-paciente').value.trim(),
+    tipoCirugia: document.getElementById('mc-tipo').value.trim(),
+    presupuesto: document.getElementById('mc-presupuesto').value,
+    importeNC: document.getElementById('mc-nc').value,
+    folioNC: document.getElementById('mc-folionc').value.trim(),
+    estatus: document.getElementById('mc-estatus').value,
+    observaciones: document.getElementById('mc-obs').value.trim()
+  };
+  if (!datos.fechaCirugia || !datos.medicoCirujano || !datos.paciente){
+    showToast('Fecha, médico y paciente son obligatorios.', true);
+    return;
+  }
+  if (!datos.estatus){
+    showToast('Selecciona el estatus (paquete y pendiente/pagada).', true);
+    return;
+  }
+  if (id){
+    datos.totalCobrado = document.getElementById('mc-cobrado').value;
+    datos.formaPago = document.getElementById('mc-formapago').value;
+    datos.folioFactura = document.getElementById('mc-foliofactura').value.trim();
+    runServer('actualizarCirugia', [id, datos, sesion.nombre], function(){
+      showToast('Cirugía actualizada.');
+      cerrarModalCirugia();
+      cargarTodo();
+    });
+  } else {
+    datos.capturadoPor = sesion.nombre;
+    runServer('crearCirugia', [datos], function(){
+      showToast('Cirugía registrada.');
+      cerrarModalCirugia();
+      cargarTodo();
+    });
+  }
+}
+
+function eliminarDesdeModal(){
+  var id = this.dataset.id;
+  if (!id) return;
+  if (!confirm('¿Eliminar esta cirugía? Podrás recuperarla después desde "Ver papelera".')) return;
+  runServer('eliminarCirugia', [id, sesion.nombre], function(){
+    showToast('Cirugía eliminada.');
+    cerrarModalCirugia();
+    cargarTodo();
+  });
+}
+
+/* ===================== Modal Registrar cobro (Cajas) ===================== */
+var cobroCirugiaActual = null;
+document.getElementById('rc-cancelar').addEventListener('click', function(){
+  document.getElementById('modal-cobro').classList.remove('open');
+});
+document.getElementById('rc-guardar').addEventListener('click', function(){
+  var monto = document.getElementById('rc-monto').value;
+  if (monto === '' || isNaN(parseFloat(monto))){
+    showToast('Captura un monto válido.', true);
+    return;
+  }
+  var formaPago = document.getElementById('rc-formapago').value;
+  var folio = document.getElementById('rc-folio').value.trim();
+  runServer('registrarCobro', [cobroCirugiaActual.id, monto, sesion.nombre, formaPago, folio], function(){
+    showToast('Cobro registrado.');
+    document.getElementById('modal-cobro').classList.remove('open');
+    cargarTodo();
+  });
+});
+
+function abrirModalCobro(c){
+  cobroCirugiaActual = c;
+  document.getElementById('rc-info').innerHTML =
+    esc(c.paciente) + ' — ' + esc(c.medicoCirujano) + '<br>' +
+    'Presupuesto: ' + money(c.presupuesto) + ' · N.C.: ' + money(c.importeNC) +
+    '<br>Cobrado hasta ahora: ' + money(c.totalCobrado);
+  document.getElementById('rc-monto').value = c.totalCobrado || '';
+  document.getElementById('rc-formapago').value = c.formaPago || FORMAS_PAGO[0];
+  document.getElementById('rc-folio').value = c.folioFactura || '';
+  document.getElementById('modal-cobro').classList.add('open');
+}
+
+/* ===================== Arranque ===================== */
+if (cargarSesionGuardada()){
+  iniciarApp();
+}
+</script>
+</body>
+</html>
