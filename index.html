@@ -394,8 +394,8 @@
           <table>
             <thead>
               <tr>
-                <th>Fecha</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
-                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Diferencia</th>
+                <th>Fecha</th><th>N° Atención</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
+                <th>Presupuesto</th><th>Total Real</th><th>Cobrado</th><th>Nota de Crédito</th><th>Diferencia</th>
                 <th>Estatus</th><th></th>
               </tr>
             </thead>
@@ -422,8 +422,8 @@
           <table>
             <thead>
               <tr>
-                <th>Fecha</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
-                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Falta por cobrar</th>
+                <th>Fecha</th><th>N° Atención</th><th>Médico</th><th>Paciente</th><th>Cirugía</th>
+                <th>Presupuesto</th><th>Total Real</th><th>Cobrado</th><th>Nota de Crédito</th><th>Falta por cobrar</th>
                 <th>Días</th><th>Estatus</th><th></th>
               </tr>
             </thead>
@@ -461,7 +461,7 @@
         <div class="tablewrap">
           <table>
             <thead>
-              <tr><th></th><th>Cirugías</th><th>Pagadas</th><th>Pendientes</th><th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th></tr>
+              <tr><th></th><th>Cirugías</th><th>Pagadas</th><th>Pendientes</th><th>Presupuesto</th><th>Total Real</th><th>Cobrado</th><th>Nota de Crédito</th><th>Pendiente</th></tr>
             </thead>
             <tbody id="tabla-paquete"></tbody>
           </table>
@@ -473,7 +473,7 @@
             <thead>
               <tr>
                 <th>Médico</th><th>Cirugías</th><th>Pagadas</th><th>Pendientes</th>
-                <th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th><th>Antigüedad prom.</th>
+                <th>Presupuesto</th><th>Total Real</th><th>Cobrado</th><th>Nota de Crédito</th><th>Pendiente</th><th>Antigüedad prom.</th>
               </tr>
             </thead>
             <tbody id="tabla-concentrado"></tbody>
@@ -486,7 +486,7 @@
           <div class="tablewrap">
             <table>
               <thead>
-                <tr><th>Mes</th><th>Cirugías</th><th>Presupuesto</th><th>Cobrado</th><th>N.C.</th><th>Pendiente</th></tr>
+                <tr><th>Mes</th><th>Cirugías</th><th>Presupuesto</th><th>Total Real</th><th>Cobrado</th><th>Nota de Crédito</th><th>Pendiente</th></tr>
               </thead>
               <tbody id="tabla-tendencia"></tbody>
             </table>
@@ -506,6 +506,10 @@
       <div class="field">
         <label>Fecha de cirugía</label>
         <input type="date" id="mc-fecha">
+      </div>
+      <div class="field">
+        <label>Número de atención</label>
+        <input type="text" id="mc-numeroatencion" placeholder="N° de atención">
       </div>
       <div class="field">
         <label>Estatus</label>
@@ -528,7 +532,11 @@
         <input type="number" step="0.01" id="mc-presupuesto">
       </div>
       <div class="field">
-        <label>Importe N.C. (no atención / cancelación)</label>
+        <label>Total real</label>
+        <input type="number" step="0.01" id="mc-totalreal">
+      </div>
+      <div class="field">
+        <label>Importe Nota de Crédito (no atención / cancelación)</label>
         <input type="number" step="0.01" id="mc-nc">
       </div>
       <div class="field" style="grid-column:1/-1;">
@@ -552,6 +560,7 @@
         <textarea id="mc-obs" rows="2"></textarea>
       </div>
     </div>
+    <p class="hint">El pendiente de cobro se calcula sobre el <strong>Total Real</strong>; el Presupuesto queda solo como referencia de la cotización.</p>
     <p class="hint" id="mc-cobro-info"></p>
     <div class="modal-actions">
       <button class="btn danger small" id="mc-eliminar" style="display:none;">Eliminar cirugía</button>
@@ -878,8 +887,8 @@ document.getElementById('f-mostrar-eliminados').addEventListener('change', funct
 
 function filaCSVCirugia(c){
   return [
-    c.fechaCirugia, c.medicoCirujano, c.paciente, c.tipoCirugia,
-    c.presupuesto, c.totalCobrado, c.importeNC, c.folioNC, c.diferencia,
+    c.fechaCirugia, c.numeroAtencion, c.medicoCirujano, c.paciente, c.tipoCirugia,
+    c.presupuesto, c.totalReal, c.totalCobrado, c.importeNC, c.folioNC, c.diferencia,
     c.estatus, c.formaPago, c.folioFactura, c.observaciones,
     c.capturadoPor, c.modificadoPor, c.cobradoPor
   ];
@@ -912,10 +921,12 @@ function renderRegistro(){
           : '<button class="btn teal small" data-id="'+c.id+'">Cobro</button>');
     tr.innerHTML =
       '<td>'+(c.fechaCirugia||'')+'</td>'+
+      '<td>'+esc(c.numeroAtencion)+'</td>'+
       '<td>'+esc(c.medicoCirujano)+'</td>'+
       '<td>'+esc(c.paciente)+'</td>'+
       '<td>'+esc(c.tipoCirugia)+'</td>'+
       '<td class="money">'+money(c.presupuesto)+'</td>'+
+      '<td class="money">'+money(c.totalReal)+'</td>'+
       '<td class="money">'+money(c.totalCobrado)+'</td>'+
       '<td class="money">'+money(c.importeNC)+'</td>'+
       '<td class="money'+(c.diferencia>0.01?' neg':'')+'">'+money(c.diferencia)+'</td>'+
@@ -951,7 +962,7 @@ document.getElementById('btn-exportar-registro').addEventListener('click', funct
     var okFecha = enRango(c.fechaCirugia, desde, hasta);
     return okBuscar && okEstatus && okFecha;
   });
-  var filas = [['Fecha','Médico','Paciente','Cirugía','Presupuesto','Cobrado','Importe NC','Folio NC','Diferencia','Estatus','Forma de pago','Folio factura','Observaciones','Capturado por','Modificado por','Cobrado por']];
+  var filas = [['Fecha','N° Atención','Médico','Paciente','Cirugía','Presupuesto','Total Real','Cobrado','Importe Nota de Crédito','Folio Nota de Crédito','Diferencia','Estatus','Forma de pago','Folio factura','Observaciones','Capturado por','Modificado por','Cobrado por']];
   lista.forEach(function(c){ filas.push(filaCSVCirugia(c)); });
   descargarCSV('presupuestos_quirurgicos_' + (verEliminados ? 'papelera' : 'registro') + '.csv', filas);
 });
@@ -984,10 +995,12 @@ function renderPendientes(){
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>'+(c.fechaCirugia||'')+'</td>'+
+      '<td>'+esc(c.numeroAtencion)+'</td>'+
       '<td>'+esc(c.medicoCirujano)+'</td>'+
       '<td>'+esc(c.paciente)+'</td>'+
       '<td>'+esc(c.tipoCirugia)+'</td>'+
       '<td class="money">'+money(c.presupuesto)+'</td>'+
+      '<td class="money">'+money(c.totalReal)+'</td>'+
       '<td class="money">'+money(c.totalCobrado)+'</td>'+
       '<td class="money">'+money(c.importeNC)+'</td>'+
       '<td class="money neg">'+money(c.diferencia)+'</td>'+
@@ -1064,6 +1077,7 @@ function renderConcentrado(res, vista){
       '<td>'+g.pagadas+'</td>'+
       '<td>'+g.pendientes+'</td>'+
       '<td class="money">'+money(g.presupuesto)+'</td>'+
+      '<td class="money">'+money(g.totalReal)+'</td>'+
       '<td class="money">'+money(g.totalCobrado)+'</td>'+
       '<td class="money">'+money(g.importeNC)+'</td>'+
       '<td class="money'+(g.pendiente>0.01?' neg':'')+'">'+money(g.pendiente)+'</td>';
@@ -1081,6 +1095,7 @@ function renderConcentrado(res, vista){
       '<td>'+g.pagadas+'</td>'+
       '<td>'+g.pendientes+'</td>'+
       '<td class="money">'+money(g.presupuesto)+'</td>'+
+      '<td class="money">'+money(g.totalReal)+'</td>'+
       '<td class="money">'+money(g.totalCobrado)+'</td>'+
       '<td class="money">'+money(g.importeNC)+'</td>'+
       '<td class="money'+(g.pendiente>0.01?' neg':'')+'">'+money(g.pendiente)+'</td>'+
@@ -1097,6 +1112,7 @@ function renderConcentrado(res, vista){
         '<td>'+MESES[m.mes-1]+'</td>'+
         '<td>'+m.cirugias+'</td>'+
         '<td class="money">'+money(m.presupuesto)+'</td>'+
+        '<td class="money">'+money(m.totalReal)+'</td>'+
         '<td class="money">'+money(m.totalCobrado)+'</td>'+
         '<td class="money">'+money(m.importeNC)+'</td>'+
         '<td class="money'+(m.pendiente>0.01?' neg':'')+'">'+money(m.pendiente)+'</td>';
@@ -1114,12 +1130,12 @@ function stat(lbl, val){
 document.getElementById('btn-exportar-concentrado').addEventListener('click', function(){
   var datos = window._ultimoConcentrado;
   if (!datos) return;
-  var filas = [['Médico','Cirugías','Pagadas','Pendientes','Presupuesto','Cobrado','Importe NC','Pendiente','Antigüedad prom. (días)']];
+  var filas = [['Médico','Cirugías','Pagadas','Pendientes','Presupuesto','Total Real','Cobrado','Importe Nota de Crédito','Pendiente','Antigüedad prom. (días)']];
   datos.res.porMedico.forEach(function(g){
-    filas.push([g.medico, g.cirugias, g.pagadas, g.pendientes, g.presupuesto, g.totalCobrado, g.importeNC, g.pendiente, g.diasPendientePromedio]);
+    filas.push([g.medico, g.cirugias, g.pagadas, g.pendientes, g.presupuesto, g.totalReal, g.totalCobrado, g.importeNC, g.pendiente, g.diasPendientePromedio]);
   });
   var t = datos.res.totales;
-  filas.push(['TOTAL', t.cirugias, t.pagadas, t.pendientes, t.presupuesto, t.totalCobrado, t.importeNC, t.pendiente, t.diasPendientePromedio]);
+  filas.push(['TOTAL', t.cirugias, t.pagadas, t.pendientes, t.presupuesto, t.totalReal, t.totalCobrado, t.importeNC, t.pendiente, t.diasPendientePromedio]);
   descargarCSV('concentrado_' + datos.vista + '.csv', filas);
 });
 
@@ -1133,10 +1149,12 @@ function abrirModalNueva(){
   document.getElementById('modal-cirugia-titulo').textContent = 'Nueva cirugía';
   document.getElementById('mc-id').value = '';
   document.getElementById('mc-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mc-numeroatencion').value = '';
   document.getElementById('mc-medico').value = '';
   document.getElementById('mc-paciente').value = '';
   document.getElementById('mc-tipo').value = '';
   document.getElementById('mc-presupuesto').value = '';
+  document.getElementById('mc-totalreal').value = '';
   document.getElementById('mc-nc').value = 0;
   document.getElementById('mc-folionc').value = '';
   document.getElementById('mc-estatus').value = '';
@@ -1153,10 +1171,12 @@ function abrirModalEditar(c){
   document.getElementById('modal-cirugia-titulo').textContent = 'Editar cirugía';
   document.getElementById('mc-id').value = c.id;
   document.getElementById('mc-fecha').value = c.fechaCirugia;
+  document.getElementById('mc-numeroatencion').value = c.numeroAtencion || '';
   document.getElementById('mc-medico').value = c.medicoCirujano;
   document.getElementById('mc-paciente').value = c.paciente;
   document.getElementById('mc-tipo').value = c.tipoCirugia;
   document.getElementById('mc-presupuesto').value = c.presupuesto;
+  document.getElementById('mc-totalreal').value = c.totalReal;
   document.getElementById('mc-nc').value = c.importeNC;
   document.getElementById('mc-folionc').value = c.folioNC || '';
   document.getElementById('mc-estatus').value = c.estatus;
@@ -1181,10 +1201,12 @@ function guardarCirugia(){
   var id = document.getElementById('mc-id').value;
   var datos = {
     fechaCirugia: document.getElementById('mc-fecha').value,
+    numeroAtencion: document.getElementById('mc-numeroatencion').value.trim(),
     medicoCirujano: document.getElementById('mc-medico').value.trim(),
     paciente: document.getElementById('mc-paciente').value.trim(),
     tipoCirugia: document.getElementById('mc-tipo').value.trim(),
     presupuesto: document.getElementById('mc-presupuesto').value,
+    totalReal: document.getElementById('mc-totalreal').value,
     importeNC: document.getElementById('mc-nc').value,
     folioNC: document.getElementById('mc-folionc').value.trim(),
     estatus: document.getElementById('mc-estatus').value,
@@ -1252,7 +1274,7 @@ function abrirModalCobro(c){
   cobroCirugiaActual = c;
   document.getElementById('rc-info').innerHTML =
     esc(c.paciente) + ' — ' + esc(c.medicoCirujano) + '<br>' +
-    'Presupuesto: ' + money(c.presupuesto) + ' · N.C.: ' + money(c.importeNC) +
+    'Total Real: ' + money(c.totalReal) + ' · Presupuesto: ' + money(c.presupuesto) + ' · Nota de Crédito: ' + money(c.importeNC) +
     '<br>Cobrado hasta ahora: ' + money(c.totalCobrado);
   document.getElementById('rc-monto').value = c.totalCobrado || '';
   document.getElementById('rc-formapago').value = c.formaPago || FORMAS_PAGO[0];
